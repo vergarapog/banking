@@ -21,8 +21,11 @@ import { Input } from "@/components/ui/input";
 import CustomInput from "./CustomInput";
 import { Loader2 } from "lucide-react";
 import { authFormSchema } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { signIn, signUp } from "@/lib/actions/user.actions";
 
 const AuthForm = ({ type }: { type: string }) => {
+  const router = useRouter;
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,8 +41,18 @@ const AuthForm = ({ type }: { type: string }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      console.log(values);
-      setIsLoading(false);
+      if (type === "sign-up") {
+        const newUser = await signUp(values);
+        setUser(newUser);
+      }
+
+      if (type === "sign-in") {
+        const response = await signIn({
+          email: values.email,
+          password: values.password,
+        });
+        if (response) router.push("/");
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -101,6 +114,12 @@ const AuthForm = ({ type }: { type: string }) => {
                     name="address"
                     label="Address"
                     placeholder="Enter your specific address"
+                  />
+                  <CustomInput
+                    control={form.control}
+                    name="city"
+                    label="City"
+                    placeholder="Enter your city"
                   />
                   <div className="flex gap-4">
                     <CustomInput
